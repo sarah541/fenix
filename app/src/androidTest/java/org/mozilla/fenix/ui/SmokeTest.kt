@@ -12,6 +12,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import androidx.test.rule.GrantPermissionRule
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.UiSelector
 import mozilla.components.browser.state.store.BrowserStore
 import mozilla.components.concept.engine.mediasession.MediaSession
 import okhttp3.mockwebserver.MockWebServer
@@ -32,6 +33,7 @@ import org.mozilla.fenix.helpers.HomeActivityIntentTestRule
 import org.mozilla.fenix.helpers.RecyclerViewIdlingResource
 import org.mozilla.fenix.helpers.TestAssetHelper
 import org.mozilla.fenix.helpers.TestAssetHelper.downloadFileName
+import org.mozilla.fenix.helpers.TestAssetHelper.waitingTime
 import org.mozilla.fenix.helpers.TestHelper
 import org.mozilla.fenix.helpers.TestHelper.appName
 import org.mozilla.fenix.helpers.TestHelper.assertExternalAppOpens
@@ -813,6 +815,37 @@ class SmokeTest {
         }.openDownloadsManager {
             verifyEmptyDownloadsList()
         }
+    }
+
+    @Test
+    fun downloadMultipleTypes() {
+        val page = "http://demo.borland.com/testsite/download_testpage.php"
+        val pdf = mDevice.findObject(UiSelector().textContains("3rdPartyLicenseTexts.pdf"))
+        val txt = mDevice.findObject(UiSelector().textContains("Hello.txt"))
+        val downloadBtn = mDevice.findObject(UiSelector().textContains("Download"))
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(page.toUri()) {
+            pdf.waitForExists(waitingTime)
+            pdf.click()
+            downloadBtn.click()
+        }
+        downloadRobot {
+            verifyDownloadPrompt()
+        }.clickDownload {
+            mDevice.waitForIdle()
+            verifyDownloadNotificationPopup()
+        }.closePrompt {
+            txt.waitForExists(waitingTime)
+            txt.click()
+            downloadBtn.click()
+        }
+        downloadRobot {
+            verifyDownloadPrompt()
+        }.clickDownload {
+            mDevice.waitForIdle()
+            verifyDownloadNotificationPopup()
+        }.closePrompt {}
     }
 
     @Test
