@@ -818,11 +818,37 @@ class SmokeTest {
     }
 
     @Test
-    fun downloadMultipleTypes() {
+    fun downloadExeTypeTest() {
         val page = "http://demo.borland.com/testsite/download_testpage.php"
-        val pdf = mDevice.findObject(UiSelector().textContains("3rdPartyLicenseTexts.pdf"))
-        val txt = mDevice.findObject(UiSelector().textContains("Hello.txt"))
-        val downloadBtn = mDevice.findObject(UiSelector().textContains("Download"))
+        val title = "SmallExecutable.exe"
+        val exe = mDevice.findObject(UiSelector().textContains(title))
+        val downloadBtn = mDevice.findObject(UiSelector().text("Download"))
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(page.toUri()) {
+            exe.waitForExists(waitingTime)
+            exe.click()
+            downloadBtn.click()
+        }
+        downloadRobot {
+            verifyDownloadPrompt()
+        }.clickDownload {
+            verifyDownloadNotificationPopup()
+        }.closePrompt {
+        }.openThreeDotMenu {
+        }.openDownloadsManager {
+            waitForDownloadsListToExist()
+            verifyDownloadedFileName(title)
+            verifyDownloadedFileIcon()
+        }
+    }
+
+    @Test
+    fun downloadPDFTypeTest() {
+        val page = "http://demo.borland.com/testsite/download_testpage.php"
+        val title = "3rdPartyLicenseTexts.pdf"
+        val pdf = mDevice.findObject(UiSelector().textContains(title))
+        val downloadBtn = mDevice.findObject(UiSelector().text("Download"))
 
         navigationToolbar {
         }.enterURLAndEnterToBrowser(page.toUri()) {
@@ -833,19 +859,40 @@ class SmokeTest {
         downloadRobot {
             verifyDownloadPrompt()
         }.clickDownload {
-            mDevice.waitForIdle()
             verifyDownloadNotificationPopup()
         }.closePrompt {
-            txt.waitForExists(waitingTime)
-            txt.click()
+        }.openThreeDotMenu {
+        }.openDownloadsManager {
+            waitForDownloadsListToExist()
+            verifyDownloadedFileName(title)
+            verifyDownloadedFileIcon()
+        }
+    }
+
+    @Test
+    fun downloadZIPTypeTest() {
+        val page = "http://demo.borland.com/testsite/download_testpage.php"
+        val title = "Small.zip"
+        val zip = mDevice.findObject(UiSelector().textContains(title))
+        val downloadBtn = mDevice.findObject(UiSelector().text("Download"))
+
+        navigationToolbar {
+        }.enterURLAndEnterToBrowser(page.toUri()) {
+            zip.waitForExists(waitingTime)
+            zip.click()
             downloadBtn.click()
         }
         downloadRobot {
             verifyDownloadPrompt()
         }.clickDownload {
-            mDevice.waitForIdle()
             verifyDownloadNotificationPopup()
-        }.closePrompt {}
+        }.closePrompt {
+        }.openThreeDotMenu {
+        }.openDownloadsManager {
+            waitForDownloadsListToExist()
+            verifyDownloadedFileName(title)
+            verifyDownloadedFileIcon()
+        }
     }
 
     @Test
