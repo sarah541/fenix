@@ -297,6 +297,8 @@ class SessionControlAdapter(
             RecentBookmarksHeaderViewHolder.LAYOUT_ID -> RecentBookmarksHeaderViewHolder(view, interactor)
             RecentVisitsHeaderViewHolder.LAYOUT_ID -> RecentVisitsHeaderViewHolder(
                 view,
+                composeView = ComposeView(parent.context),
+                viewLifecycleOwner,
                 interactor
             )
             BottomSpacerViewHolder.LAYOUT_ID -> BottomSpacerViewHolder(view)

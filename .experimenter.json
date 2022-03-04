@@ -10,17 +10,6 @@
       }
     }
   },
-  "default-browser-message": {
-    "description": "A small feature allowing experiments on the placement of a default browser message.",
-    "hasExposure": true,
-    "exposureDescription": "",
-    "variables": {
-      "message-location": {
-        "description": "Where is the message to be put.",
-        "type": "string"
-      }
-    }
-  },
   "search-term-groups": {
     "description": "A feature allowing the grouping of URLs around the search term that it came from.",
     "hasExposure": true,
@@ -47,6 +36,17 @@
       },
       "settings-title": {
         "description": "The title of displayed in the Settings screen and app menu.",
+        "type": "string"
+      }
+    }
+  },
+  "default-browser-message": {
+    "description": "A small feature allowing experiments on the placement of a default browser message.",
+    "hasExposure": true,
+    "exposureDescription": "",
+    "variables": {
+      "message-location": {
+        "description": "Where is the message to be put.",
         "type": "string"
       }
     }
