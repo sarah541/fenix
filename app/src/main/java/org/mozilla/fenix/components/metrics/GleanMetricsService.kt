@@ -558,6 +558,26 @@ private val Event.wrapper: EventWrapper<*>?
             { TopSites.swipeCarousel.record(it) },
             { TopSites.swipeCarouselKeys.valueOf(it) }
         )
+        is Event.TopSiteContileImpression -> EventWrapper<NoExtraKeys>(
+            {
+                TopSites.contileImpression.record(
+                    TopSites.ContileImpressionExtra(
+                        position = this.position,
+                        source = this.source.name.lowercase()
+                    )
+                )
+            }
+        )
+        is Event.TopSiteContileClick -> EventWrapper<NoExtraKeys>(
+            {
+                TopSites.contileClick.record(
+                    TopSites.ContileClickExtra(
+                        position = this.position,
+                        source = this.source.name.lowercase()
+                    )
+                )
+            }
+        )
         is Event.PocketTopSiteClicked -> EventWrapper<NoExtraKeys>(
             { Pocket.pocketTopSiteClicked.record(it) }
         )
@@ -695,13 +715,6 @@ private val Event.wrapper: EventWrapper<*>?
         )
         is Event.TabsTrayOpenInactiveTab -> EventWrapper<NoExtraKeys>(
             { TabsTray.openInactiveTab.add() }
-        )
-        is Event.InactiveTabsSurveyOpened -> EventWrapper<NoExtraKeys>(
-            { Preferences.inactiveTabsSurveyOpened.record(it) }
-        )
-        is Event.InactiveTabsOffSurvey -> EventWrapper(
-            { Preferences.turnOffInactiveTabsSurvey.record(it) },
-            { Preferences.turnOffInactiveTabsSurveyKeys.valueOf(it) }
         )
         is Event.InactiveTabsCountUpdate -> EventWrapper<NoExtraKeys>(
             { Metrics.inactiveTabsCount.set(this.count.toLong()) },
