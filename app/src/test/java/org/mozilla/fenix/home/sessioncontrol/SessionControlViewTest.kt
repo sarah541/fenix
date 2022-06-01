@@ -10,8 +10,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import mozilla.components.feature.tab.collections.TabCollection
 import mozilla.components.feature.top.sites.TopSite
-import mozilla.components.service.pocket.PocketStory
-import mozilla.components.service.pocket.PocketStory.PocketRecommendedStory
+import mozilla.components.service.pocket.PocketRecommendedStory
 import mozilla.components.support.test.robolectric.testContext
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -68,24 +67,24 @@ class SessionControlViewTest {
 
     @Test
     fun `GIVEN pocketArticles WHEN calling shouldShowHomeOnboardingDialog THEN show the dialog `() {
-        val pocketStories = listOf(PocketRecommendedStory("", "", "", "", "", 0, 0))
+        val pocketArticles = listOf(PocketRecommendedStory("", "", "", "", "", 0, 0))
         val settings: Settings = mockk()
 
         every { settings.hasShownHomeOnboardingDialog } returns false
 
-        val state = AppState(pocketStories = pocketStories)
+        val state = AppState(pocketStories = pocketArticles)
 
         assertTrue(state.shouldShowHomeOnboardingDialog(settings))
     }
 
     @Test
     fun `GIVEN the home onboading dialog has been shown before WHEN calling shouldShowHomeOnboardingDialog THEN DO NOT showthe dialog `() {
-        val pocketStories = listOf(PocketRecommendedStory("", "", "", "", "", 0, 0))
+        val pocketArticles = listOf(PocketRecommendedStory("", "", "", "", "", 0, 0))
         val settings: Settings = mockk()
 
         every { settings.hasShownHomeOnboardingDialog } returns true
 
-        val state = AppState(pocketStories = pocketStories)
+        val state = AppState(pocketStories = pocketArticles)
 
         assertFalse(state.shouldShowHomeOnboardingDialog(settings))
     }
@@ -104,7 +103,7 @@ class SessionControlViewTest {
 
         val state = AppState(recentTabs = recentTabs)
 
-        controller.update(state)
+        controller.update(view, false, state)
 
         verify {
             interactor.showOnboardingDialog()
@@ -124,7 +123,7 @@ class SessionControlViewTest {
 
         val state = AppState()
 
-        controller.update(state)
+        controller.update(view, false, state)
 
         verify(exactly = 0) {
             interactor.showOnboardingDialog()
@@ -140,7 +139,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf(RecentBookmark())
         val recentTabs = emptyList<RecentTab.Tab>()
         val historyMetadata = emptyList<RecentHistoryGroup>()
-        val pocketStories = emptyList<PocketStory>()
+        val pocketArticles = emptyList<PocketRecommendedStory>()
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -158,7 +158,9 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
@@ -176,8 +178,9 @@ class SessionControlViewTest {
         val recentBookmarks = listOf(RecentBookmark())
         val recentTabs = emptyList<RecentTab.Tab>()
         val historyMetadata = emptyList<RecentHistoryGroup>()
-        val pocketStories = emptyList<PocketStory>()
+        val pocketArticles = emptyList<PocketRecommendedStory>()
         val nimbusMessageCard: Message = mockk()
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -195,7 +198,9 @@ class SessionControlViewTest {
             nimbusMessageCard,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results.contains(AdapterItem.NimbusMessageCard(nimbusMessageCard)))
@@ -210,7 +215,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf<RecentBookmark>()
         val recentTabs = listOf<RecentTab.Tab>(mockk())
         val historyMetadata = emptyList<RecentHistoryGroup>()
-        val pocketStories = emptyList<PocketStory>()
+        val pocketArticles = emptyList<PocketRecommendedStory>()
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -228,7 +234,9 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
@@ -246,7 +254,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf<RecentBookmark>()
         val recentTabs = emptyList<RecentTab.Tab>()
         val historyMetadata = listOf(RecentHistoryGroup("title", emptyList()))
-        val pocketStories = emptyList<PocketStory>()
+        val pocketArticles = emptyList<PocketRecommendedStory>()
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -264,7 +273,9 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
@@ -282,7 +293,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf<RecentBookmark>()
         val recentTabs = emptyList<RecentTab.Tab>()
         val historyMetadata = emptyList<RecentHistoryGroup>()
-        val pocketStories = listOf(PocketRecommendedStory("", "", "", "", "", 1, 1))
+        val pocketArticles = listOf(PocketRecommendedStory("", "", "", "", "", 1, 1))
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -300,7 +312,9 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
@@ -319,7 +333,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf<RecentBookmark>()
         val recentTabs = emptyList<RecentTab.Tab>()
         val historyMetadata = emptyList<RecentHistoryGroup>()
-        val pocketStories = emptyList<PocketStory>()
+        val pocketArticles = emptyList<PocketRecommendedStory>()
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -337,7 +352,9 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
         assertEquals(results.size, 2)
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
@@ -355,7 +372,8 @@ class SessionControlViewTest {
         val recentBookmarks = listOf<RecentBookmark>(mockk())
         val recentTabs = listOf<RecentTab.Tab>(mockk())
         val historyMetadata = listOf<RecentHistoryGroup>(mockk())
-        val pocketStories = listOf<PocketStory>(mockk())
+        val pocketArticles = listOf<PocketRecommendedStory>(mockk())
+        val view = RecyclerView(testContext)
 
         every { settings.showTopSitesFeature } returns true
         every { settings.showRecentTabsFeature } returns true
@@ -373,9 +391,12 @@ class SessionControlViewTest {
             null,
             recentTabs,
             historyMetadata,
-            pocketStories
+            pocketArticles,
+            view,
+            false
         )
 
         assertTrue(results[0] is AdapterItem.TopPlaceholderItem)
     }
 }
+

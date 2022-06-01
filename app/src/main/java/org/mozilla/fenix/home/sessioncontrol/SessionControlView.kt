@@ -4,6 +4,8 @@
 
 package org.mozilla.fenix.home.sessioncontrol
 
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.LifecycleOwner
@@ -38,38 +40,53 @@ internal fun normalModeAdapterItems(
     nimbusMessageCard: Message? = null,
     recentTabs: List<RecentTab>,
     recentVisits: List<RecentlyVisitedItem>,
-    pocketStories: List<PocketStory>
+    pocketStories: List<PocketStory>,
+    recyclerView: RecyclerView,
+    scrollToCollection: Boolean
 ): List<AdapterItem> {
     val items = mutableListOf<AdapterItem>()
     var shouldShowCustomizeHome = false
+    var collectionPosition = 0
 
     // Add a synchronous, unconditional and invisible placeholder so home is anchored to the top when created.
     items.add(AdapterItem.TopPlaceholderItem)
+    collectionPosition+=1
 
     nimbusMessageCard?.let {
         items.add(AdapterItem.NimbusMessageCard(it))
+        collectionPosition+=1
     }
 
     if (settings.showTopSitesFeature && topSites.isNotEmpty()) {
         items.add(AdapterItem.TopSitePager(topSites))
+        collectionPosition+=1
+        collectionPosition+=topSites.size
     }
 
     if (settings.showRecentTabsFeature && recentTabs.isNotEmpty()) {
         shouldShowCustomizeHome = true
         items.add(AdapterItem.RecentTabsHeader)
         items.add(AdapterItem.RecentTabItem)
+        collectionPosition+=1
+        collectionPosition+=recentTabs.size
+
     }
 
     if (settings.showRecentBookmarksFeature && recentBookmarks.isNotEmpty()) {
         shouldShowCustomizeHome = true
         items.add(AdapterItem.RecentBookmarksHeader)
         items.add(AdapterItem.RecentBookmarks)
+        collectionPosition+=1
+        collectionPosition+=recentBookmarks.size
     }
 
     if (settings.historyMetadataUIFeature && recentVisits.isNotEmpty()) {
         shouldShowCustomizeHome = true
         items.add(AdapterItem.RecentVisitsHeader)
         items.add(AdapterItem.RecentVisitsItems)
+        collectionPosition+=1
+        collectionPosition += if (recentTabs.size > 3) 3
+        else recentTabs.size
     }
 
     if (collections.isEmpty()) {
@@ -77,6 +94,7 @@ internal fun normalModeAdapterItems(
             items.add(AdapterItem.NoCollectionsMessage)
         }
     } else {
+        collectionPosition += 1
         showCollections(collections, expandedCollections, items)
     }
 
@@ -92,6 +110,15 @@ internal fun normalModeAdapterItems(
     }
 
     items.add(AdapterItem.BottomSpacer)
+
+    if (scrollToCollection) {
+        Handler(Looper.getMainLooper()).postDelayed(
+            kotlinx.coroutines.Runnable {
+                recyclerView.scrollToPosition(collectionPosition)
+            }, 1000
+        )
+        scrollToCollection = false
+    }
 
     return items
 }
@@ -148,7 +175,7 @@ private fun onboardingAdapterItems(onboardingState: OnboardingState): List<Adapt
     return items
 }
 
-private fun AppState.toAdapterList(settings: Settings): List<AdapterItem> = when (mode) {
+private fun AppState.toAdapterList(settings: Settings, recyclerView: RecyclerView, scrollToCollection: Boolean): List<AdapterItem> = when (mode) {
     is Mode.Normal -> normalModeAdapterItems(
         settings,
         topSites,
@@ -159,7 +186,9 @@ private fun AppState.toAdapterList(settings: Settings): List<AdapterItem> = when
         messaging.messageToShow,
         recentTabs,
         recentHistory,
-        pocketStories
+        pocketStories,
+        recyclerView,
+        scrollToCollection
     )
     is Mode.Private -> privateModeAdapterItems()
     is Mode.Onboarding -> onboardingAdapterItems(mode.state)
@@ -204,13 +233,13 @@ class SessionControlView(
         }
     }
 
-    fun update(state: AppState, shouldReportMetrics: Boolean = false) {
+    fun update(recyclerView: RecyclerView, scrollToCollection: Boolean, state: AppState, shouldReportMetrics: Boolean = false) {
         if (state.shouldShowHomeOnboardingDialog(view.context.settings())) {
             interactor.showOnboardingDialog()
         }
 
         if (shouldReportMetrics) interactor.reportSessionMetrics(state)
 
-        sessionControlAdapter.submitList(state.toAdapterList(view.context.settings()))
+        sessionControlAdapter.submitList(state.toAdapterList(view.context.settings(), recyclerView, scrollToCollection))
     }
 }

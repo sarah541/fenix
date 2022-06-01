@@ -431,13 +431,16 @@ class HomeFragment : Fragment() {
     private fun updateSessionControlView() {
         if (browsingModeManager.mode == BrowsingMode.Private) {
             binding.root.consumeFrom(requireContext().components.appStore, viewLifecycleOwner) {
-                sessionControlView?.update(it)
+                sessionControlView?.update(binding.sessionControlRecyclerView, !bundleArgs.getBoolean(
+                    FOCUS_ON_ADDRESS_BAR) ,it)
             }
         } else {
-            sessionControlView?.update(requireContext().components.appStore.state)
+            sessionControlView?.update(binding.sessionControlRecyclerView, !bundleArgs.getBoolean(
+                FOCUS_ON_ADDRESS_BAR), requireContext().components.appStore.state)
 
             binding.root.consumeFrom(requireContext().components.appStore, viewLifecycleOwner) {
-                sessionControlView?.update(it, shouldReportMetrics = true)
+                sessionControlView?.update(binding.sessionControlRecyclerView, !bundleArgs.getBoolean(
+                    FOCUS_ON_ADDRESS_BAR), it, shouldReportMetrics = true)
             }
         }
     }
